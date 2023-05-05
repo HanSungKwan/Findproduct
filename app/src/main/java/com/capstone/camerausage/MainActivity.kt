@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity() {
             put(MediaStore.MediaColumns.DISPLAY_NAME, name)
             put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
             if(Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
-                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/CameraUsage-Picture")
+                put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/FindProduct")
             }
         }
 
@@ -142,7 +142,7 @@ class MainActivity : AppCompatActivity() {
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
-                    Log.e(TAG, "사진 촬영 됐다 Photo capture failed: ${exc.message}", exc)
+                    Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
                 }
 
                 override fun
