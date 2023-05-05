@@ -64,9 +64,9 @@ class MainActivity : AppCompatActivity() {
     //
     // Vars for Http Communication
     private val targetUri:String = "http://114.70.92.44:11000/tForm/"
-//    private val client:OkHttpClient by lazy { OkHttpClient() }
-//    private val requestBody: MultipartBody.Builder by lazy { MultipartBody.Builder() }
-//    private val request: Request.Builder by lazy { Request.Builder() }
+    private val client:OkHttpClient by lazy { OkHttpClient() }
+    private val requestBody: MultipartBody.Builder by lazy { MultipartBody.Builder() }
+    private val request: Request.Builder by lazy { Request.Builder() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -192,7 +192,7 @@ class MainActivity : AppCompatActivity() {
         )
         QueryAndPost(
             projection, null, null, sortOrder,
-//            client, null, requestBody, request
+            client, null, requestBody, request
         )
     }
 //    private fun captureVideo() {}
@@ -203,10 +203,10 @@ class MainActivity : AppCompatActivity() {
                              selectionArgs: Array<String>?,
                              sortOrder: String?,
 //                             targetResults: Array<String>,
-//                             client: OkHttpClient,
-//                             requestBody: RequestBody?,
-//                             multiPartBody:MultipartBody.Builder?,
-//                             request:Request.Builder
+                             client: OkHttpClient,
+                             requestBody: RequestBody?,
+                             multiPartBody:MultipartBody.Builder?,
+                             request:Request.Builder
     ) {
 
         val resultQuery = contentResolver.query(
@@ -237,7 +237,6 @@ class MainActivity : AppCompatActivity() {
         }
         // FileProvider 또는 Files에contentResolver.openInputStream(
         ////            MediaStore.setRequireOriginal(contentUri))?.use {
-        ////
         ////        } 사용하기
 //        multiPartBody.let{
 //            it.setType(MultipartBody.FORM)
