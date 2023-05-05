@@ -3,6 +3,8 @@ package com.capstone.camerausage
 import android.Manifest
 import android.content.ContentValues
 import android.content.pm.PackageManager
+import android.database.Cursor
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
@@ -19,18 +21,52 @@ import androidx.camera.core.Preview
 import androidx.camera.core.CameraSelector
 import android.util.Log
 import androidx.camera.core.ImageCaptureException
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import java.io.File
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
+    // Vars for Photos
+    /// Var for Camera vision preview
     private lateinit var viewBinding: ActivityMainBinding
 
+    /// Var for image capture instance
     private var imageCapture: ImageCapture? = null
 //    private var videoCapture: VideoCapture<Recorder>? = null
 //    private var recording: Recording? = null
 
+    /// Var for assign executor to image capture
     private lateinit var cameraExecutor: ExecutorService
+    //
+    // Vars for Queries
+    /// Var for query instance
+//    private var resultQuery: Cursor? = null
+    /// Var for query to projection(WHERE col, col, col, ...)
+    private val projection = arrayOf(
+        MediaStore.Images.Media._ID,
+        MediaStore.Images.Media.DISPLAY_NAME,
+        MediaStore.Images.Media.DATE_TAKEN
+    )
+    /// Var for query to sort(ORDER BY threshold desc)
+    private val sortOrder = "${MediaStore.Images.Media.DATE_TAKEN} DESC"
+    /// Var for query result
+    private var id: Long? = null
+    private var dateTaken: Date? = null
+    private var displayName: String? = null
+    private var contentUri: Uri? = null
+    private var resultFile: File? = null
+    //
+    // Vars for Http Communication
+    private val targetUri:String = "http://114.70.92.44:11000/tForm/"
+//    private val client:OkHttpClient by lazy { OkHttpClient() }
+//    private val requestBody: MultipartBody.Builder by lazy { MultipartBody.Builder() }
+//    private val request: Request.Builder by lazy { Request.Builder() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,6 +148,7 @@ class MainActivity : AppCompatActivity() {
             }
 
         }, ContextCompat.getMainExecutor(this))
+
     }
     private fun takePhoto() {
         // Get a stable reference of the modifiable image capture use case
@@ -153,8 +190,61 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
+        QueryAndPost(
+            projection, null, null, sortOrder,
+//            client, null, requestBody, request
+        )
     }
 //    private fun captureVideo() {}
+
+    // Function: Query and Post a picture to server
+    private fun QueryAndPost(projection: Array<String>,
+                             selection: String?,
+                             selectionArgs: Array<String>?,
+                             sortOrder: String?,
+//                             targetResults: Array<String>,
+//                             client: OkHttpClient,
+//                             requestBody: RequestBody?,
+//                             multiPartBody:MultipartBody.Builder?,
+//                             request:Request.Builder
+    ) {
+
+        val resultQuery = contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            sortOrder
+        )
+
+        resultQuery?.use {cursor ->
+            val idColumn = cursor.getColumnIndexOrThrow(
+                MediaStore.Images.Media._ID)
+            val dateTakenColumn = cursor.getColumnIndexOrThrow(
+                MediaStore.Images.Media.DATE_TAKEN)
+            val displayNameColumn = cursor.getColumnIndexOrThrow(
+                MediaStore.Images.Media.DISPLAY_NAME)
+
+            cursor.moveToFirst()
+            id = cursor.getLong(idColumn)
+            dateTaken = Date(cursor.getLong(dateTakenColumn))
+            displayName = cursor.getString(displayNameColumn)
+            contentUri = Uri.withAppendedPath(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                id.toString()
+            )
+            Toast.makeText(baseContext, "qry sux${ id.toString() }", Toast.LENGTH_LONG).show()
+        }
+        // FileProvider 또는 Files에contentResolver.openInputStream(
+        ////            MediaStore.setRequireOriginal(contentUri))?.use {
+        ////
+        ////        } 사용하기
+//        multiPartBody.let{
+//            it.setType(MultipartBody.FORM)
+//            it.addFormDataPart("inFile", displayName)
+//        }
+        
+    }
 
     override fun onDestroy() {
         super.onDestroy()
