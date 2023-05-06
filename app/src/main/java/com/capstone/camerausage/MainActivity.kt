@@ -22,6 +22,8 @@ import androidx.camera.core.CameraSelector
 import android.util.Log
 import androidx.camera.core.ImageCaptureException
 import androidx.core.net.toFile
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -29,7 +31,9 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -288,6 +292,32 @@ class MainActivity : AppCompatActivity() {
                 it.url(targetUri)
                 it.post(mltPBody)
                 it.build()
+            }
+        }
+
+        reQuest?.let {
+            displayName?.let{
+            client.newCall(reQuest).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+//                    Toast.makeText(
+//                        baseContext,
+//                        "Failed! $displayName",
+//                        Toast.LENGTH_SHORT
+//                    )
+//                        .show()
+                    Log.e("POST", "Request failed: ${e.message}")
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+//                    Toast.makeText(
+//                        baseContext,
+//                        "Success! $displayName",
+//                        Toast.LENGTH_SHORT
+//                    )
+//                        .show()
+                    Log.i("POST", "Request successful $displayName")
+                }
+            })
             }
         }
     }
