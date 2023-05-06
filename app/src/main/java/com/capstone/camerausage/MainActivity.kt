@@ -21,11 +21,16 @@ import androidx.camera.core.Preview
 import androidx.camera.core.CameraSelector
 import android.util.Log
 import androidx.camera.core.ImageCaptureException
+import androidx.core.net.toFile
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -233,7 +238,7 @@ class MainActivity : AppCompatActivity() {
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 id.toString()
             )
-            Toast.makeText(baseContext, "qry sux${ id.toString() }", Toast.LENGTH_LONG).show()
+            Toast.makeText(baseContext, "qry sux${ id.toString() }", Toast.LENGTH_SHORT).show()
         }
         // FileProvider 또는 Files에contentResolver.openInputStream(
         ////            MediaStore.setRequireOriginal(contentUri))?.use {
@@ -242,7 +247,49 @@ class MainActivity : AppCompatActivity() {
 //            it.setType(MultipartBody.FORM)
 //            it.addFormDataPart("inFile", displayName)
 //        }
-        
+//        val imageByteArr =
+//            contentUri?.let { MediaStore.setRequireOriginal(it) }?.let {
+//                contentResolver.openTypedAssetFileDescriptor(
+//                    it,
+//                    "image/jpeg",
+//                    null
+//                ).use { assFDescriptor ->
+//                    assFDescriptor?.createInputStream().readAllBytes() ?: null
+//                }
+//            }
+        val target = contentUri?.let { uri ->
+            contentResolver.openTypedAssetFileDescriptor(
+                uri,
+                "image/jpeg",
+                null
+            )
+        }?.let {
+            it.use{descriptor ->
+                descriptor.createInputStream().readBytes()
+            }
+        }
+
+        val mltPartBody = multiPartBody?.let { bBuilder->
+            target?.let{ tFile ->
+                displayName?.let { filename->
+                    bBuilder.setType(MultipartBody.FORM)
+                    bBuilder.addFormDataPart(
+                            "tFile",
+                            filename,
+                            tFile.toRequestBody("image/jpeg".toMediaType())
+                    )
+                    bBuilder.build()
+                }
+            }
+        }
+
+        val reQuest = request?.let {
+            mltPartBody?.let { mltPBody ->
+                it.url(targetUri)
+                it.post(mltPBody)
+                it.build()
+            }
+        }
     }
 
     override fun onDestroy() {
