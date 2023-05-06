@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
     private var resultFile: File? = null
     //
     // Vars for Http Communication
-    private val targetUri:String = "http://114.70.92.44:11000/tForm/"
+    private val targetUri:String = "http://114.70.92.44:11000/ttPost/"
     private val client:OkHttpClient by lazy { OkHttpClient() }
     private val requestBody: MultipartBody.Builder by lazy { MultipartBody.Builder() }
     private val request: Request.Builder by lazy { Request.Builder() }
@@ -242,7 +242,7 @@ class MainActivity : AppCompatActivity() {
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 id.toString()
             )
-            Toast.makeText(baseContext, "qry sux${ id.toString() }", Toast.LENGTH_SHORT).show()
+            Toast.makeText(baseContext, "qry sux${ displayName.toString() }", Toast.LENGTH_SHORT).show()
         }
         // FileProvider 또는 Files에contentResolver.openInputStream(
         ////            MediaStore.setRequireOriginal(contentUri))?.use {
@@ -274,15 +274,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         val mltPartBody = multiPartBody?.let { bBuilder->
-            target?.let{ tFile ->
+            target?.let{ fileBytesArr ->
                 displayName?.let { filename->
+//                    val tFile: File = File.createTempFile(filename, "")
                     bBuilder.setType(MultipartBody.FORM)
-                    bBuilder.addFormDataPart(
+                    .addFormDataPart(
                             "tFile",
                             filename,
-                            tFile.toRequestBody("image/jpeg".toMediaType())
+//                            tFile.asRequestBody("image/jpeg".toMediaType())
+                            fileBytesArr.toRequestBody("image/jpeg".toMediaType())
                     )
-                    bBuilder.build()
+                    .build()
                 }
             }
         }
@@ -290,8 +292,8 @@ class MainActivity : AppCompatActivity() {
         val reQuest = request?.let {
             mltPartBody?.let { mltPBody ->
                 it.url(targetUri)
-                it.post(mltPBody)
-                it.build()
+                .post(mltPBody)
+                .build()
             }
         }
 
