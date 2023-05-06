@@ -32,8 +32,20 @@ async def test_form(text: Annotated[str, Form()]):
     print(f"server received data : {text}")
     return {"server received data" : text}
 
+@app.post("/ttPost/")
+# async def testPost(inFile: bytes = File()):
+async def testPost(inFile: UploadFile):
+    print(inFile.filename)
+    print(inFile.content_type)
+    return {"filename": inFile.filename,
+            "contentType" : inFile.content_type}
+    # return len(inFile)
+
 @app.post("/tFile/")
 async def create_upload_file(inFile: UploadFile = File()):
+    print(inFile)
+    print(inFile.filename)
+    print(inFile.content_type)
     # 오류: input file != image
     if 'image' not in inFile.content_type:
         return {"filename" : inFile.filename,
