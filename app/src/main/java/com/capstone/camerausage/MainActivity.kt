@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
     private var resultFile: File? = null
     //
     // Vars for Http Communication
-    private val targetUri:String = "http://114.70.92.44:11000/ttPost/"
+    private val targetUri:String = "http://114.70.92.44:11000/tFile/"
     private val client:OkHttpClient by lazy { OkHttpClient() }
     private val requestBody: MultipartBody.Builder by lazy { MultipartBody.Builder() }
     private val request: Request.Builder by lazy { Request.Builder() }
@@ -191,18 +191,19 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
                 }
 
-                override fun
-                        onImageSaved(output: ImageCapture.OutputFileResults){
+                override fun onImageSaved(output: ImageCapture.OutputFileResults){
                     val msg = "Photo capture succeeded: ${output.savedUri}"
                     Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
                     Log.d(TAG, msg)
+
+                    QueryAndPost(
+                        projection, null, null, sortOrder,
+                        client, null, requestBody, request
+                    )
                 }
             }
         )
-        QueryAndPost(
-            projection, null, null, sortOrder,
-            client, null, requestBody, request
-        )
+
     }
 //    private fun captureVideo() {}
 
@@ -276,15 +277,17 @@ class MainActivity : AppCompatActivity() {
         val mltPartBody = multiPartBody?.let { bBuilder->
             target?.let{ fileBytesArr ->
                 displayName?.let { filename->
+                    Toast.makeText(baseContext, "bytes ${fileBytesArr.size}", Toast.LENGTH_SHORT).show()
 //                    val tFile: File = File.createTempFile(filename, "")
                     bBuilder.setType(MultipartBody.FORM)
                     .addFormDataPart(
-                            "tFile",
+                            "inFile",
                             filename,
 //                            tFile.asRequestBody("image/jpeg".toMediaType())
                             fileBytesArr.toRequestBody("image/jpeg".toMediaType())
                     )
                     .build()
+//                    2944701
                 }
             }
         }
