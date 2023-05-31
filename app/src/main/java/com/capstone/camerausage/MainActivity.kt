@@ -58,38 +58,60 @@ class MainActivity: AppCompatActivity(), TextToSpeech.OnInitListener {
 
         setContentView(R.layout.activity_main)
 
-        tts = TextToSpeech(this, this)
+        tts = TextToSpeech(this, this@MainActivity::onInit)
+
 
         val camera_button = findViewById<Button>(R.id.camera_btn)
         camera_button.setOnClickListener {
             val intent = Intent(this@MainActivity, CameraActivity::class.java)
             startActivity(intent)
         }
+        //camera_button.performClick() // 버튼 자동 실행
 
-        val stt_button = findViewById<Button>(R.id.stt_btn)
-        stt_button.setOnClickListener {
-            speechRecognizer.startListening(speechRecognizerIntent)
-            startForResult.launch(speechRecognizerIntent)
+
+
+//        val stt_button = findViewById<Button>(R.id.stt_btn)
+//        stt_button.setOnClickListener {
+//            speechRecognizer.startListening(speechRecognizerIntent)
+//            startForResult.launch(speechRecognizerIntent)
+//        }
+//
+//        val tts_button = findViewById<Button>(R.id.tts_btn)
+//        tts_button.setOnClickListener{
+//            //initializeTextToSpeech()
+//        }
+
+    }
+
+
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            val result = tts.setLanguage(Locale.getDefault())
+            tts.setPitch(1.0f);
+            tts.setSpeechRate(1.0f);
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                // 언어 데이터가 없거나 지원되지 않는 경우 처리하는 부분을 추가하세요.
+            } else {
+                val utteranceId = "utteranceId"
+                tts.speak(
+                    "안녕하세요 findproduct입니다. 화면을 터치해서 사진을 찍으면 음료에 대한 정보를 알려드립니다.",
+                    TextToSpeech.QUEUE_FLUSH,
+                    null,
+                    utteranceId
+                )
+            }
+        } else {
+            // TTS 초기화 실패 시 처리하는 부분을 추가하세요.
         }
     }
 
     override fun onDestroy() {
-        super.onDestroy()
-        speechRecognizer.destroy()
-        tts.stop()
-        tts.shutdown()
-    }
-
-    override fun onInit(status: Int) {
-        if (status == TextToSpeech.SUCCESS) {
-            // 언어 설정
-            val result = tts.setLanguage(Locale.getDefault())
-            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                Log.e("TTS", "This language is not supported")
-            }
-        } else {
-            Log.e("TTS", "Initialization failed")
+        if (::tts.isInitialized) {
+            tts.stop()
+            tts.shutdown()
         }
+        super.onDestroy()
     }
 
 //    private fun postRequest(json: String) {
