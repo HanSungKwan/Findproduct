@@ -2,6 +2,7 @@
 images/
 miniconda3/
 runs/
+datasets/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
