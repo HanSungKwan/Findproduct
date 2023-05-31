@@ -1,5 +1,7 @@
 # data for DeepLearning training except
 images/
+miniconda3/
+runs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,0 +1,1 @@
+Welcome! this package is named Beverage-detection Using Yolov8(B.U.Y) created by Kim Mingi.
